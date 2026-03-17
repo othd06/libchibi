@@ -2,10 +2,6 @@
 #include "chibicc.h"
 
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/wait.h>
 
 
 static FILE *open_file(char *path) {
