@@ -11,6 +11,32 @@ static char *argreg32[] = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
 static char *argreg64[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 static Obj *current_fn;
 
+bool is_integer(Type *ty) {
+    switch (ty->kind) {
+    case TY_BOOL:
+    case TY_CHAR:
+    case TY_SHORT:
+    case TY_INT:
+    case TY_LONG:
+    case TY_ENUM:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool is_flonum(Type *ty) {
+    switch (ty->kind) {
+    case TY_FLOAT:
+    case TY_DOUBLE:
+    case TY_LDOUBLE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+
 static void gen_expr(Node *node);
 static void gen_stmt(Node *node);
 
@@ -179,7 +205,7 @@ static void gen_addr(Node *node) {
     return;
   }
 
-  error_tok(node->tok, "not an lvalue");
+  error("not an lvalue");
 }
 
 // Load a value from where %rax is pointing to.
@@ -690,7 +716,7 @@ static void builtin_alloca(void) {
 
 // Generate code for a given node.
 static void gen_expr(Node *node) {
-  println("  .loc %d %d", node->tok->file->file_no, node->tok->line_no);
+  println("  .loc %d %d", node->file_num, node->line_num);
 
   switch (node->kind) {
   case ND_NULL_EXPR:
@@ -1050,7 +1076,7 @@ static void gen_expr(Node *node) {
       return;
     }
 
-    error_tok(node->tok, "invalid expression");
+    error("invalid expression");
   }
   case TY_LDOUBLE: {
     gen_expr(node->lhs);
@@ -1089,7 +1115,7 @@ static void gen_expr(Node *node) {
       return;
     }
 
-    error_tok(node->tok, "invalid expression");
+    error("invalid expression");
   }
   }
 
@@ -1182,11 +1208,11 @@ static void gen_expr(Node *node) {
     return;
   }
 
-  error_tok(node->tok, "invalid expression");
+  error("invalid expression");
 }
 
 static void gen_stmt(Node *node) {
-  println("  .loc %d %d", node->tok->file->file_no, node->tok->line_no);
+  println("  .loc %d %d", node->file_num, node->line_num);
 
   switch (node->kind) {
   case ND_IF: {
@@ -1303,7 +1329,7 @@ static void gen_stmt(Node *node) {
     return;
   }
 
-  error_tok(node->tok, "invalid statement");
+  error("invalid statement");
 }
 
 // Assign offsets to local variables.
@@ -1585,9 +1611,8 @@ static void emit_text(Obj *prog) {
 void codegen(Obj *prog, FILE *out) {
   output_file = out;
 
-  File **files = get_input_files();
-  for (int i = 0; files[i]; i++)
-    println("  .file %d \"%s\"", files[i]->file_no, files[i]->name);
+  for (int i = 0; i < debug_file_count; i++)
+    println("  .file %d \"%s\"", debug_files[i].file_num, debug_files[i].file_name);
 
   assign_lvar_offsets(prog);
   emit_data(prog);

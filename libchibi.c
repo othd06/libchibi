@@ -2,7 +2,16 @@
 #include "chibicc.h"
 
 #include <unistd.h>
+#include <sys/wait.h>
 
+bool opt_fpic = false;
+bool opt_fcommon = false;
+DebugFile *debug_files = NULL;
+int debug_file_count = 0;
+
+static void register_debug_files(DebugFile *files, int count) {debug_files = files; debug_file_count = count;}
+static void set_fpic(bool enabled) {opt_fpic = enabled;}
+static void set_fcommon(bool enabled) {opt_fcommon = enabled;}
 
 static FILE *open_file(char *path) {
     if (!path || strcmp(path, "-") == 0)

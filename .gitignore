@@ -9,3 +9,4 @@
 /test/*.exe
 /stage2
 /c_code
+*.bak
