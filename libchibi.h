@@ -23,9 +23,9 @@ typedef struct {
     const char *file_name;
     int file_num;
 } DebugFile;
-void register_debug_files(DebugFile* files, int count)
-void set_fpic(bool enabled)
-void set_fcommon(bool enabled)
+void register_debug_files(DebugFile* files, int count);
+void set_fpic(bool enabled);
+void set_fcommon(bool enabled);
 void cProg(ObjectList prog, char* output_file);
 void aProg(ObjectList prog, char* output_file);
 
@@ -52,7 +52,7 @@ Node create_ge_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_ass_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_cond_node(Type type, Node cond_node, Node then_node, Node else_node, int file_num, int line_num);
 Node create_comma_node(Node lhs, Node rhs, int file_num, int line_num);
-Node create_member_node(Node struct_node, Member member, int file_num, int line_num);
+Node create_member_node(Node struct_node, Type struct_union_type, int member_idx, int file_num, int line_num);
 Node create_addr_node(Node value, int file_num, int line_num);
 Node create_deref_node(Node value, int file_num, int line_num);
 Node create_not_node(Node value, int file_num, int line_num);

@@ -617,7 +617,7 @@ GlobalInit create_struct_initialiser(Type* type, void* data[]) {
 
         if (current->is_bitfield) {
             int bitfields = 0;
-            while (current->next->offset == current->offset) {
+            while (current->next != NULL && current->next->offset == current->offset) {
                 int** arr = *data;
                 int elem = *arr[index];
                 elem = elem & (0xFFFFFFFF >> (32-current->bit_width));
@@ -1098,7 +1098,12 @@ Node* create_comma_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     node->line_num = line_num;
     return node;
 }
-Node* create_member_node(Node* struct_node, Member* member, int file_num, int line_num) {
+Node* create_member_node(Node* struct_node, Type* struct_union_type, int member_idx, int file_num, int line_num) {
+    Member* member;
+    {
+        member = struct_union_type->members;
+        for (int i = 0; i < member idx; i++) member = member->next;
+    }
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_MEMBER;
     node->next = NULL;
@@ -1132,7 +1137,7 @@ Node* create_deref_node(Node* value, int file_num, int line_num) {
 }
 Node* create_not_node(Node* value, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_NEG;
+    node->kind = ND_NOT;
     node->next = NULL;
     node->ty = create_base_type(BTY_BOOL);
     node->lhs = value;
@@ -1302,7 +1307,7 @@ Node* create_switch_node(Node** cases_node_list, Node* cond_node, int file_num, 
     {
         Node* current_case_node = *cases_node_list;
         Node* current_body_node = current_case_node->body;
-        while (current_case_node != NULL && current_body_node == NULL) {
+        while (current_case_node != NULL && current_case_node->next != NULL && current_body_node == NULL) {
             current_case_node = current_case_node->next;
             current_body_node = current_case_node->body;
         }
