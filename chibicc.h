@@ -71,7 +71,6 @@ struct Obj {
 
     // Static inline function
     bool is_live;
-    bool is_root;
 };
 
 
@@ -178,6 +177,7 @@ typedef enum {
   ND_DO,        // "do"
   ND_SWITCH,    // "switch"
   ND_CASE,      // "case"
+  ND_DEFAULT_CASE, //Only used in lowering switch statements from tree-like for the frontend into the form codegen understands in the API code
   ND_BLOCK,     // { ... }
   ND_GOTO,      // "goto"
   ND_GOTO_EXPR, // "goto" labels-as-values
