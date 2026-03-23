@@ -1307,7 +1307,7 @@ Node* create_switch_node(Node** cases_node_list, Node* cond_node, int file_num, 
             current_body_node = current_case_node->body;
         }
 
-        Node** body_list = calloc(1, sizeof(Node*));
+        body_list = calloc(1, sizeof(Node*));
         *body_list = current_body_node;
 
         while (current_case_node != NULL && current_case_node->next != NULL) {
