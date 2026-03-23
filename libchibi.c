@@ -524,8 +524,8 @@ GlobalInit create_array_initialiser(Type* type, void* data) {
     //call with a pointer to an array of either:
         //the raw datas (for raw datatypes)
         //PtrInitDatas (for raw pointers)
-        //arrays of initialisation data (for nested arrays)
-        //arrays of pointers (for structs)
+        //data pointers (for nested arrays)
+        //pointers to arrays of pointers (for structs)
         //arrays of UnionInitDatas (for structs)
     GlobalInit initialiser;
     initialiser.init_data = calloc(1, type->size);
@@ -541,7 +541,7 @@ GlobalInit create_array_initialiser(Type* type, void* data) {
             void** elem = arr[i];
             comp_init = create_struct_initialiser(type->base, elem);
         } else if (type->base->kind == TY_ARRAY) {
-            void*** arr = data;
+            void** arr = data;
             void* subarray = arr[i];
             comp_init = create_array_initialiser(type->base, subarray);
         } else if (type->base->kind == TY_PTR) {

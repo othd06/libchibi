@@ -132,15 +132,41 @@ typedef struct {
     Type union_type;
     Type data_type;
     void* data;
+    /*
+    data is a pointer to:
+        The raw data (for raw datatype members)
+        A PtrInitData (for raw pointer members)
+        An array of initialisation data (for array members)
+        An array of pointers (for struct members)
+        A UnionInitData (for nested union members)
+        An integer with its least significant bits representing the bitfield (for bitfield members)
+    */
 } UnionInitData;
 GlobalInit create_base_type_initialiser(void* data, int size);
-/**/
+/*
+data is a pointer to a value of the type that this will be used to initialise
+*/
 GlobalInit create_ptr_initialiser(PtrInitData data);
 GlobalInit create_struct_initialiser(Type type, void* data[]);
-/**/
+/*
+call with the type of the struct and an array of pointers to either:
+    The raw data (for raw datatype members)
+    A PtrInitData (for raw pointer members)
+    An array of initialisation data (for array members)
+    An array of pointers (for nested struct members)
+    A UnionInitData (for union members)
+    An integer with its least significant bits representing the bitfield (for bitfield members)
+*/
 GlobalInit create_union_initialiser(UnionInitData data);
 GlobalInit create_array_initialiser(Type type, void* data);
-/**/
+/*
+call with a pointer to an array of either:
+    the raw datas (for raw datatypes)
+    PtrInitDatas (for raw pointers)
+    data pointers (for nested arrays)
+    pointers to arrays of pointers (for structs)
+    arrays of UnionInitDatas (for structs)
+*/
 
 Object create_global_variable_declaration(char* name, Type type);
 Object create_global_variable_declaration_full(char* name, Type type, bool is_static, bool is_tls, bool is_extern);
