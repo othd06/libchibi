@@ -1102,7 +1102,7 @@ Node* create_member_node(Node* struct_node, Type* struct_union_type, int member_
     Member* member;
     {
         member = struct_union_type->members;
-        for (int i = 0; i < member idx; i++) member = member->next;
+        for (int i = 0; i < member_idx; i++) member = member->next;
     }
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_MEMBER;
