@@ -811,14 +811,14 @@ static FILE *open_file(char *path) {
     return out;
 }
 
-static void cProg(Obj *prog, char *output_file) {
+static void cProg(Obj** prog, char *output_file) {
     // Open a temporary output buffer.
     char *buf;
     size_t buflen;
     FILE *output_buf = open_memstream(&buf, &buflen);
 
     // Traverse the AST to emit assembly.
-    codegen(prog, output_buf);
+    codegen(*prog, output_buf);
     fclose(output_buf);
 
     // Write the asembly text to a file.
@@ -827,7 +827,7 @@ static void cProg(Obj *prog, char *output_file) {
     fclose(out);
 }
 
-static void aProg(Obj *prog, char *output_file) {
+static void aProg(Obj** prog, char *output_file) {
     // 1. Create a temporary file for the assembly output.
     char asm_template[] = "/tmp/libchibi-XXXXXX.s";
 
