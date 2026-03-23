@@ -787,7 +787,7 @@ bool bubble_pass(Obj** list) {
     }
     return complete;
 }
-void resection_Objs(Obj** list) {
+void resection_objects(Obj** list) {
     while (!bubble_pass(list)) {}
 }
 
@@ -797,9 +797,9 @@ bool opt_fcommon = false;
 DebugFile *debug_files = NULL;
 int debug_file_count = 0;
 
-static void register_debug_files(DebugFile *files, int count) {debug_files = files; debug_file_count = count;}
-static void set_fpic(bool enabled) {opt_fpic = enabled;}
-static void set_fcommon(bool enabled) {opt_fcommon = enabled;}
+void register_debug_files(DebugFile *files, int count) {debug_files = files; debug_file_count = count;}
+void set_fpic(bool enabled) {opt_fpic = enabled;}
+void set_fcommon(bool enabled) {opt_fcommon = enabled;}
 
 static FILE *open_file(char *path) {
     if (!path || strcmp(path, "-") == 0)
@@ -811,7 +811,7 @@ static FILE *open_file(char *path) {
     return out;
 }
 
-static void cProg(Obj** prog, char *output_file) {
+void cProg(Obj** prog, char *output_file) {
     // Open a temporary output buffer.
     char *buf;
     size_t buflen;
@@ -827,7 +827,7 @@ static void cProg(Obj** prog, char *output_file) {
     fclose(out);
 }
 
-static void aProg(Obj** prog, char *output_file) {
+void aProg(Obj** prog, char *output_file) {
     // 1. Create a temporary file for the assembly output.
     char asm_template[] = "/tmp/libchibi-XXXXXX.s";
 
@@ -1075,7 +1075,7 @@ Node* create_ass_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     node->line_num = line_num;
     return node;
 }
-Node* create_cond_node_node(Type* type, Node* cond_node, Node* then_node, Node* else_node, int file_num, int line_num) {
+Node* create_cond_node(Type* type, Node* cond_node, Node* then_node, Node* else_node, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_COND;
     node->next = NULL;
