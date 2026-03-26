@@ -352,6 +352,211 @@ void append_type(Type** list, Type* type) {
     current->next = type;
 }
 
+void traverse_node(Node* node, *Object function) {
+    if (node == NULL) return;
+    switch (node->ty) {
+        case (ND_NULL_EXPR): {
+            break;
+        } case (ND_ADD): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_SUB): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_MUL): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_DIV): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_NEG): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_MOD): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_BITAND): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_BITOR): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_BITXOR): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_SHL): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_SHR): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_EQ): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_NE): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_LT): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_LE): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_ASSIGN): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_COND): {
+            traverse_node(node->cond, function);
+            traverse_node(node->then, function);
+            traverse_node(node->else, function);
+            break;
+        } case (ND_COMMA): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_MEMBER): {
+            break;
+        } case (ND_ADDR): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_DEREF): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_NOT): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_BITNOT): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_LOGAND): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_LOGOR): {
+            traverse_node(node->lhs, function);
+            traverse_node(node->rhs, function);
+            break;
+        } case (ND_RETURN): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_IF): {
+            traverse_node(node->cond, function);
+            traverse_node(node->then, function);
+            traverse_node(node->els, function);
+            break;
+        } case (ND_FOR): {
+            traverse_node(node->init, function);
+            traverse_node(node->cond, function);
+            traverse_node(node->inc, function);
+            traverse_node(node->body, function);
+            break;
+        } case (ND_DO): {
+            traverse_node(node->body, function);
+            traverse_node(node->cond, function);
+            break;
+        } case (ND_SWITCH): {
+            traverse_node(node->case_next, function);
+            traverse_node(node->case_default, function);
+            traverse_node(node->body, function);
+            break;
+        } case (ND_CASE): {
+            traverse_node(node->next, function);
+            break;
+        } case (ND_BLOCK): {
+            Node* current = node->body;
+            while (current != NULL) {
+                traverse_node(current, function);
+                current = current->next;
+            }
+            break;
+        } case (ND_GOTO): {
+            break;
+        } case (ND_GOTO_EXPR): {
+            break;
+        } case (ND_LABEL): {
+            break;
+        } case (ND_LABEL_VAL): {
+            break;
+        } case (ND_FUNCALL): {
+            break;
+        } case (ND_EXPR_STMT): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_STMT_EXPR): {
+            traverse_node(node->body, function);
+            break;
+        } case (ND_VAR): {
+            if (node->label != NULL) {
+                Obj* local_var;
+                {
+                    Obj* current = function->locals;
+                    if (current == NULL) error("attempting to extract nonexistent local variable");
+                    while(strcmp(current->name, node->label) != 0) {
+                        current = current->next;
+                        if (current == NULL) error("attempting to extract nonexistent local variable");
+                    }
+                    local_var = current;
+                }
+                node->ty = local_var->ty;
+                node->var = local_var;
+                node->label == NULL;
+            }
+            break;
+        } case (ND_VLA_PTR): {
+            if (node->label != NULL) {
+                Obj* local_var;
+                {
+                    Obj* current = function->locals;
+                    if (current == NULL) error("attempting to extract nonexistent local variable");
+                    while(strcmp(current->name, node->label) != 0) {
+                        current = current->next;
+                        if (current == NULL) error("attempting to extract nonexistent local variable");
+                    }
+                    local_var = current;
+                }
+                node->ty = local_var->ty;
+                node->var = local_var;
+                node->label == NULL;
+            }
+            break;
+        } case (ND_NUM): {
+            break;
+        } case (ND_CAST): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_MEMZERO): {
+            traverse_node(node->lhs, function);
+            break;
+        } case (ND_ASM): {
+            break;
+        } case (ND_CAS): {
+            traverse_node(node->cas_addr, function);
+            traverse_node(node->cas_old, function);
+            traverse_node(node->cas_new, function);
+            break;
+        } case (ND_EXCH): {
+            traverse_node(node->cas_addr, function);
+            traverse_node(node->cas_new, function);
+            break;
+        }
+    }
+}
+
 Obj* create_function_definition_full(char* name, Type* func_type, int argc, char* argv[], int localc, Type** local_types, char* local_names[], Node* body_node, bool is_variadic, bool is_local, bool is_static, bool is_inline, bool is_live) {
     Obj* definition = calloc(1, sizeof(Obj));
     definition->next = NULL;
@@ -466,6 +671,7 @@ Obj* create_function_definition_full(char* name, Type* func_type, int argc, char
         definition->is_live = is_live;
     }
     definition->is_local = is_local;
+    traverse_node(definition->body, definition);
     return definition;
 }
 Obj* create_function_definition(char* name, Type* func_type, int argc, char* argv[], int localc, Type** local_types, char* local_names[], Node* body_node) {return create_function_definition_full(name, func_type, argc, argv, localc, local_types, local_names, body_node, false, false, false, false, true);}
@@ -1410,22 +1616,11 @@ Node* create_function_node(Obj* function, int file_num, int line_num) {
     node->line_num = line_num;
     return node;
 }
-Node* create_local_var_node(Obj* function, char* name, int file_num, int line_num) {
+Node* create_local_var_node(char* name, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_VAR;
-    Obj* local_var;
-    {
-        Obj* current = function->locals;
-        if (current == NULL) error("attempting to extract nonexistent local variable");
-        while(strcmp(current->name, name)) {
-            current = current->next;
-            if (current == NULL) error("attempting to extract nonexistent local variable");
-        }
-        local_var = current;
-    }
-    node->ty = local_var->ty;
+    node->label = memcpy(calloc(1, strlen(name)+1), name, strlen(name)+1); //used to link the node with the actual local variable later
     node->next = NULL;
-    node->var = local_var;
     node->file_num = file_num;
     node->line_num = line_num;
     {

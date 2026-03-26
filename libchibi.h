@@ -74,7 +74,7 @@ Node create_label_node(UniqueLabel unique_label, int file_num, int line_num);
 Node create_label_val_node(UniqueLabel unique_label, int file_num, int line_num);
 Node create_goto_expr_node(Node expr_node, int file_num, int line_num);
 Node create_function_node(Object function, int file_num, int line_num);
-Node create_local_var_node(Object function, char* name, int file_num, int line_num);
+Node create_local_var_node(char* name, int file_num, int line_num);
 Node create_global_var_node(Object global_var, char* name, int file_num, int line_num);
 Node create_funcall_node(Node function_node, Type function_type, NodeList arg_node_list, int file_num, int line_num);
 Node create_expression_stmt_node(Node expression_node, int file_num, int line_num);
