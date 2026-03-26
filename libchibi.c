@@ -352,9 +352,9 @@ void append_type(Type** list, Type* type) {
     current->next = type;
 }
 
-void traverse_node(Node* node, *Object function) {
+void traverse_node(Node* node, Obj* function) {
     if (node == NULL) return;
-    switch (node->ty) {
+    switch (node->kind) {
         case (ND_NULL_EXPR): {
             break;
         } case (ND_ADD): {
@@ -423,7 +423,7 @@ void traverse_node(Node* node, *Object function) {
         } case (ND_COND): {
             traverse_node(node->cond, function);
             traverse_node(node->then, function);
-            traverse_node(node->else, function);
+            traverse_node(node->els, function);
             break;
         } case (ND_COMMA): {
             traverse_node(node->lhs, function);
@@ -471,7 +471,7 @@ void traverse_node(Node* node, *Object function) {
             break;
         } case (ND_SWITCH): {
             traverse_node(node->case_next, function);
-            traverse_node(node->case_default, function);
+            traverse_node(node->default_case, function);
             traverse_node(node->body, function);
             break;
         } case (ND_CASE): {
@@ -514,7 +514,8 @@ void traverse_node(Node* node, *Object function) {
                 }
                 node->ty = local_var->ty;
                 node->var = local_var;
-                node->label == NULL;
+                if (local_var->ty->kind == TY_VLA) node->kind = ND_VLA_PTR;
+                node->label = NULL;
             }
             break;
         } case (ND_VLA_PTR): {
@@ -531,7 +532,7 @@ void traverse_node(Node* node, *Object function) {
                 }
                 node->ty = local_var->ty;
                 node->var = local_var;
-                node->label == NULL;
+                node->label = NULL;
             }
             break;
         } case (ND_NUM): {
@@ -1623,9 +1624,6 @@ Node* create_local_var_node(char* name, int file_num, int line_num) {
     node->next = NULL;
     node->file_num = file_num;
     node->line_num = line_num;
-    {
-        if (local_var->ty->kind == TY_VLA) node->kind = ND_VLA_PTR;
-    }
     return node;
 }
 Node* create_global_var_node(Obj* global_var, char* name, int file_num, int line_num) {
