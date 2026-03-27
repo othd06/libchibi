@@ -3,6 +3,7 @@
 
 
 #define empty_list {.raw = calloc(1, sizeof(void*))}
+#define empty_label {.raw = calloc(1, sizeof(void*))}
 
 typedef struct{void* raw;} UniqueLabel;
 typedef struct {void* raw;} Node;
