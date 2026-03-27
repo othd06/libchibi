@@ -1,18 +1,18 @@
-
+#pragma once
 #include <stdbool.h>
 
 
 #define empty_list {.raw = calloc(1, sizeof(void*))}
 
-typedef struct{void* raw} UniqueLabel;
-typedef struct {void* raw} Node;
-typedef struct {void* raw} NodeList;
-typedef struct {void* raw} MemberList;
-typedef struct {void* raw} Type;
-typedef struct {void* raw} TypeList;
-typedef struct {void* raw} Object;
-typedef struct {void* raw} ObjectList;
-typedef struct {void* raw} Relocation;
+typedef struct{void* raw;} UniqueLabel;
+typedef struct {void* raw;} Node;
+typedef struct {void* raw;} NodeList;
+typedef struct {void* raw;} MemberList;
+typedef struct {void* raw;} Type;
+typedef struct {void* raw;} TypeList;
+typedef struct {void* raw;} Object;
+typedef struct {void* raw;} ObjectList;
+typedef struct {void* raw;} Relocation;
 
 
 

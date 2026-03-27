@@ -1,8 +1,9 @@
-
+#define _GNU_SOURCE
 #include "chibicc.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 
 typedef enum {
@@ -667,7 +668,7 @@ Obj* create_function_definition_full(char* name, Type* func_type, int argc, char
         
     }
     definition->body = body_node;
-    is_live = true;
+    definition->is_live = true;
     if (is_static && is_inline) {
         definition->is_live = is_live;
     }
@@ -1032,15 +1033,31 @@ void cProg(Obj** prog, char *output_file) {
     FILE *out = open_file(output_file);
     fwrite(buf, buflen, 1, out);
     fclose(out);
+    //{
+    //    printf("running cat\n");
+    //    pid_t pid = fork();
+    //    if (pid < 0)
+    //        error("fork failed: %s", strerror(errno));
+    //    if (pid == 0) {
+    //        //child: exec 'cat'
+    //        execlp("cat", "cat", output_file, NULL);
+    //        fprintf(stderr, "cat: %s\n", strerror(errno));
+    //        _exit(1);
+    //    }
+    //    int status;
+    //    waitpid(pid, &status, 0);
+    //    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+    //        error("cat failed");
+    //}
 }
 
 void aProg(Obj** prog, char *output_file) {
     // 1. Create a temporary file for the assembly output.
     char asm_template[] = "/tmp/libchibi-XXXXXX.s";
 
-    int fd = mkstemp(asm_template);
+    int fd = mkstemps(asm_template, 2);
     if (fd < 0)
-        error("mkstemp failed: %s", strerror(errno));
+        error("mkstemps failed: %s", strerror(errno));
 
     FILE *tmp = fdopen(fd, "w");
     if (!tmp)
