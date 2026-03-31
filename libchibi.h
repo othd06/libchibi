@@ -95,6 +95,14 @@ Node create_atomic_exchange_node(Node ptr, Node new, int file_num, int line_num)
 
 void append_node(NodeList list, Node node);
 
+char get_char_literal_from_node(Node node);
+short get_short_literal_from_node(Node node);
+int get_int_literal_from_node(Node node);
+long get_long_literal_from_node(Node node);
+float get_float_literal_from_node(Node node);
+double get_double_literal_from_node(Node node);
+long double get_long_double_literal_from_node(Node node);
+
 void append_union_member_type(MemberList list, Type type);
 void append_packed_struct_bitfield_member(MemberList list, Type type, int width);
 void append_packed_struct_type_member(MemberList list, Type type);

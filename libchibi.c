@@ -1848,3 +1848,39 @@ void append_node(Node** list, Node* node) {
     current->next = node;
 }
 
+
+char get_char_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get char literal from non-literal node");
+    if (node->ty->kind != TY_CHAR) error("attempting to get char literal from non-char node");
+    return (char)node->val;
+}
+short get_short_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get short literal from non-literal node");
+    if (node->ty->kind != TY_SHORT) error("attempting to get short literal from non-short node");
+    return (short)node->val;
+}
+int get_int_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get int literal from non-literal node");
+    if (node->ty->kind != TY_INT) error("attempting to get int literal from non-int node");
+    return (int)node->val;
+}
+long get_long_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get long literal from non-literal node");
+    if (node->ty->kind != TY_LONG) error("attempting to get long literal from non-long node");
+    return (long)node->val;
+}
+float get_float_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get float literal from non-literal node");
+    if (node->ty->kind != TY_FLOAT) error("attempting to get float literal from non-float node");
+    return (float)node->fval;
+}
+double get_double_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get double literal from non-literal node");
+    if (node->ty->kind != TY_DOUBLE) error("attempting to get double literal from non-double node");
+    return (double)node->fval;
+}
+long double get_long_double_literal_from_node(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get long double literal from non-literal node");
+    if (node->ty->kind != TY_LDOUBLE) error("attempting to get long double literal from non-long-double node");
+    return (long double)node->fval;
+}
