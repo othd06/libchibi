@@ -119,6 +119,8 @@ Type create_ptr_type(Type type);
 Type create_enum_type();
 Type create_base_type(BaseType type);
 
+Type get_return_type(Type func_type);
+
 void append_type(TypeList list, Type type);
 
 typedef struct {
