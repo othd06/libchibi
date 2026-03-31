@@ -1884,3 +1884,26 @@ long double get_long_double_literal_from_node(Node* node) {
     if (node->ty->kind != TY_LDOUBLE) error("attempting to get long double literal from non-long-double node");
     return (long double)node->fval;
 }
+
+BaseType get_literal_node_type(Node* node) {
+    if (node->kind != ND_NUM) error("attempting to get literal node type from non-literal node");
+    if(node->ty->kind == TY_CHAR) {
+        return BTY_CHAR;
+    } else if(node->ty->kind == TY_SHORT) {
+        return BTY_SHORT;
+    } else if(node->ty->kind == TY_INT) {
+        return BTY_INT;
+    } else if(node->ty->kind == TY_LONG) {
+        return BTY_LONG;
+    } else if(node->ty->kind == TY_FLOAT) {
+        return BTY_FLOAT;
+    } else if(node->ty->kind == TY_DOUBLE) {
+        return BTY_DOUBLE;
+    } else if(node->ty->kind == TY_LDOUBLE) {
+        return BTY_LDOUBLE;
+    } else if(node->ty->kind == TY_BOOL) {
+        return BTY_BOOL;
+    } else if(node->ty->kind == TY_VOID) {
+        return BTY_VOID;
+    } else error("attempting to get literal node type from non-base-type literal node");
+}
