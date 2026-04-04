@@ -18,6 +18,14 @@ typedef enum {
     BTY_LDOUBLE,
 } BaseType;
 
+Type* get_expression_type(Node* expression) {
+    return expression->ty;
+}
+
+long get_type_size(Type* type) {
+    return (long)type->size;
+}
+
 Type* get_return_type(Type* func_type) {
     if (func_type->kind != TY_FUNC) error("attempting to get return type of non-function type");
     return func_type->return_ty;

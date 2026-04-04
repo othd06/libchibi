@@ -120,6 +120,8 @@ Type create_enum_type();
 Type create_base_type(BaseType type);
 
 Type get_return_type(Type func_type);
+Type get_expression_type(Node expression);
+long get_type_size(Type type);
 
 void append_type(TypeList list, Type type);
 
