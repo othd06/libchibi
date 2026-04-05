@@ -691,17 +691,17 @@ Obj* create_function_definition_full(char* name, Type* func_type, int argc, char
 }
 Obj* create_function_definition(char* name, Type* func_type, int argc, char* argv[], int localc, Type** local_types, char* local_names[], Node* body_node) {return create_function_definition_full(name, func_type, argc, argv, localc, local_types, local_names, body_node, false, false, false, false, true);}
 
-Obj* create_function_declaration_full(char* name, Type* ret_type, bool is_static) {
+Obj* create_function_declaration_full(char* name, Type* func_type, bool is_static) {
     Obj* declaration = calloc(1, sizeof(Obj));
     declaration->next = NULL;
     declaration->name = name;
-    declaration->ty = ret_type;
+    declaration->ty = func_type;
     declaration->is_function = true;
     declaration->is_definition = false;
     declaration->is_static = is_static;
     return declaration;
 }
-Obj* create_function_declaration(char* name, Type* ret_type) {return create_function_declaration_full(name, ret_type, false);}
+Obj* create_function_declaration(char* name, Type* func_type) {return create_function_declaration_full(name, func_type, false);}
 
 typedef struct {
     char* init_data;
@@ -770,8 +770,7 @@ GlobalInit create_array_initialiser(Type* type, void* data) {
             PtrInitData elem = arr[i];
             comp_init = create_ptr_initialiser(elem);
         } else {
-            void** arr = data;
-            void* elem = arr[i];
+            void* elem = (char*)data+(i*type->base->size);
             comp_init = create_base_type_initialiser(elem, type->base->size);
         }
         
@@ -911,6 +910,7 @@ Obj* create_global_variable_definition_full(char* name, Type* type, GlobalInit i
     definition->next = NULL;
     definition->name = name;
     definition->is_function = false;
+    definition->is_definition = true;
     definition->ty = type;
     definition->is_static = is_static;
     definition->is_tls = is_tls;
@@ -927,6 +927,7 @@ Obj* create_global_variable_declaration_full(char* name, Type* type, bool is_sta
     declaration->next = NULL;
     declaration->name = name;
     declaration->is_function = false;
+    declaration->is_definition = false;
     declaration->ty = type;
     declaration->is_static = is_static;
     declaration->is_tls = is_tls;

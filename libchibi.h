@@ -5,7 +5,7 @@
 #define empty_list {.raw = calloc(1, sizeof(void*))}
 #define empty_label {.raw = calloc(1, sizeof(void*))}
 
-typedef struct{void* raw;} UniqueLabel;
+typedef struct {void* raw;} UniqueLabel;
 typedef struct {void* raw;} Node;
 typedef struct {void* raw;} NodeList;
 typedef struct {void* raw;} MemberList;
@@ -46,6 +46,7 @@ Node create_bit_xor_node(Type type, Node lhs, Node rhs, int file_num, int line_n
 Node create_shl_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
 Node create_shr_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
 Node create_eq_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_ne_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_lt_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_le_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_gt_node(Node lhs, Node rhs, int file_num, int line_num);
@@ -187,7 +188,7 @@ Object create_global_variable_declaration_full(char* name, Type type, bool is_st
 Object create_global_variable_definition(char* name, Type type, GlobalInit initialiser);
 Object create_global_variable_definition_full(char* name, Type type, GlobalInit initialiser, bool is_static, bool is_tls);
 Object create_function_declaration(char* name, Type ret_type);
-Object create_function_declaration_full(char* name, Type ret_type, bool is_static);
+Object create_function_declaration_full(char* name, Type func_type, bool is_static);
 Object create_function_definition(char* name, Type func_type, int argc, char* argv[], int localc, TypeList local_types, char* local_names[], Node body_node);
 Object create_function_definition_full(char* name, Type func_type, int argc, char* argv[], int localc, TypeList local_types, char* local_names[], Node body_node, bool is_variadic, bool is_local, bool is_static, bool is_inline, bool is_live);
 
