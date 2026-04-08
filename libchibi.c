@@ -10,9 +10,13 @@ typedef enum {
     BTY_VOID,
     BTY_BOOL,
     BTY_CHAR,
+    BTY_UCHAR,
     BTY_SHORT,
+    BTY_USHORT,
     BTY_INT,
+    BTY_UINT,
     BTY_LONG,
+    BTY_ULONG,
     BTY_FLOAT,
     BTY_DOUBLE,
     BTY_LDOUBLE,
@@ -44,18 +48,42 @@ Type* create_base_type(BaseType type) {
         btype->kind = TY_CHAR;
         btype->size = 1;
         btype->align = 1;
+        btype->is_unsigned = false;
+    } else if (type == BTY_UCHAR) {
+        btype->kind = TY_CHAR;
+        btype->size = 1;
+        btype->align = 1;
+        btype->is_unsigned = true;
     } else if (type == BTY_SHORT) {
         btype->kind = TY_SHORT;
         btype->size = 2;
         btype->align = 2;
+        btype->is_unsigned = false;
+    } else if (type == BTY_USHORT) {
+        btype->kind = TY_SHORT;
+        btype->size = 2;
+        btype->align = 2;
+        btype->is_unsigned = true;
     } else if (type == BTY_INT) {
         btype->kind = TY_INT;
         btype->size = 4;
         btype->align = 4;
+        btype->is_unsigned = false;
+    } else if (type == BTY_UINT) {
+        btype->kind = TY_INT;
+        btype->size = 4;
+        btype->align = 4;
+        btype->is_unsigned = true;
     } else if (type == BTY_LONG) {
         btype->kind = TY_LONG;
         btype->size = 8;
         btype->align = 8;
+        btype->is_unsigned = false;
+    } else if (type == BTY_ULONG) {
+        btype->kind = TY_LONG;
+        btype->size = 8;
+        btype->align = 8;
+        btype->is_unsigned = true;
     } else if (type == BTY_FLOAT) {
         btype->kind = TY_FLOAT;
         btype->size = 4;
@@ -366,6 +394,16 @@ void append_type(Type** list, Type* type) {
     current->next = type;
 }
 
+Type* get_block_type(Node* block_node) {
+    if (block_node->kind != ND_BLOCK) error("attempting to create a block expression with non-block");
+    Node* current = block_node->body;
+    if (current == NULL) error("attempting to create block expression with empty body");
+    while(current->next != NULL) current = current->next;
+    if (current->kind == ND_BLOCK) return get_block_type(current);
+    else if (current->kind != ND_EXPR_STMT) error("attempting to create block expression that does not end with an expression statement");
+    else return current->lhs->ty;
+}
+
 void traverse_node(Node* node, Obj* function) {
     if (node == NULL) return;
     switch (node->kind) {
@@ -374,45 +412,64 @@ void traverse_node(Node* node, Obj* function) {
         } case (ND_ADD): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_SUB): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_MUL): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_DIV): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_NEG): {
             traverse_node(node->lhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_MOD): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_BITAND): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_BITOR): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_BITXOR): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            if (node->lhs->ty->size > node->rhs->ty->size) node->ty = node->lhs->ty;
+            else node->ty = node->rhs->ty;
             break;
         } case (ND_SHL): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_SHR): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_EQ): {
             traverse_node(node->lhs, function);
@@ -433,29 +490,38 @@ void traverse_node(Node* node, Obj* function) {
         } case (ND_ASSIGN): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_COND): {
             traverse_node(node->cond, function);
             traverse_node(node->then, function);
             traverse_node(node->els, function);
+            if (node->then->ty->size > node->els->ty->size) node->ty = node->then->ty;
+            else node->ty = node->els->ty;
             break;
         } case (ND_COMMA): {
             traverse_node(node->lhs, function);
             traverse_node(node->rhs, function);
+            node->ty = node->rhs->ty;
             break;
         } case (ND_MEMBER): {
+            traverse_node(node->lhs, function);
             break;
         } case (ND_ADDR): {
             traverse_node(node->lhs, function);
+            node->ty = create_ptr_type(node->lhs->ty);
             break;
         } case (ND_DEREF): {
             traverse_node(node->lhs, function);
+            if (node->lhs->ty->kind != TY_PTR) error("attempting to dereference non-pointer type");
+            node->ty = node->lhs->ty->base;
             break;
         } case (ND_NOT): {
             traverse_node(node->lhs, function);
             break;
         } case (ND_BITNOT): {
             traverse_node(node->lhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_LOGAND): {
             traverse_node(node->lhs, function);
@@ -467,6 +533,7 @@ void traverse_node(Node* node, Obj* function) {
             break;
         } case (ND_RETURN): {
             traverse_node(node->lhs, function);
+            node->ty = node->lhs->ty;
             break;
         } case (ND_IF): {
             traverse_node(node->cond, function);
@@ -477,7 +544,7 @@ void traverse_node(Node* node, Obj* function) {
             traverse_node(node->init, function);
             traverse_node(node->cond, function);
             traverse_node(node->inc, function);
-            traverse_node(node->body, function);
+            traverse_node(node->then, function);
             break;
         } case (ND_DO): {
             traverse_node(node->body, function);
@@ -501,18 +568,26 @@ void traverse_node(Node* node, Obj* function) {
         } case (ND_GOTO): {
             break;
         } case (ND_GOTO_EXPR): {
+            traverse_node(node->lhs, function);
             break;
         } case (ND_LABEL): {
             break;
         } case (ND_LABEL_VAL): {
             break;
         } case (ND_FUNCALL): {
+            traverse_node(node->lhs, function);
+            Node* current = node->args;
+            while (current != NULL) {
+                traverse_node(current, function);
+                current = current->next;
+            }
             break;
         } case (ND_EXPR_STMT): {
             traverse_node(node->lhs, function);
             break;
         } case (ND_STMT_EXPR): {
             traverse_node(node->body, function);
+            node->ty = get_block_type(node->body);
             break;
         } case (ND_VAR): {
             if (node->label != NULL) {
@@ -567,6 +642,7 @@ void traverse_node(Node* node, Obj* function) {
         } case (ND_EXCH): {
             traverse_node(node->cas_addr, function);
             traverse_node(node->cas_new, function);
+            node->ty = node->cas_new->ty;
             break;
         }
     }
@@ -927,7 +1003,7 @@ Obj* create_global_variable_declaration_full(char* name, Type* type, bool is_sta
     declaration->next = NULL;
     declaration->name = name;
     declaration->is_function = false;
-    declaration->is_definition = false;
+    declaration->is_definition = !is_extern;
     declaration->ty = type;
     declaration->is_static = is_static;
     declaration->is_tls = is_tls;
@@ -1116,120 +1192,120 @@ Node* create_null_expression_node(int file_num, int line_num) {
     node->line_num = line_num;
     return node;
 }
-Node* create_add_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_add_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_ADD;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_sub_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_sub_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_SUB;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_mul_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_mul_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_MUL;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_div_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_div_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_DIV;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_neg_node(Type* type, Node* value, int file_num, int line_num) {
+Node* create_neg_node(Node* value, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_NEG;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = value;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_mod_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_mod_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_MOD;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_bit_and_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_bit_and_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BITAND;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_bit_or_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_bit_or_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BITOR;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_bit_xor_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_bit_xor_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BITXOR;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_shl_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_shl_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_SHL;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_shr_node(Type* type, Node* lhs, Node* rhs, int file_num, int line_num) {
+Node* create_shr_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_SHR;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
@@ -1306,18 +1382,18 @@ Node* create_ass_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_ASSIGN;
     node->next = NULL;
-    node->ty = lhs->ty;
+    //node->ty = lhs->ty;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
-Node* create_cond_node(Type* type, Node* cond_node, Node* then_node, Node* else_node, int file_num, int line_num) {
+Node* create_cond_node(Node* cond_node, Node* then_node, Node* else_node, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_COND;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->cond = cond_node;
     node->then = then_node;
     node->els = else_node;
@@ -1329,7 +1405,7 @@ Node* create_comma_node(Node* lhs, Node* rhs, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_COMMA;
     node->next = NULL;
-    node->ty = rhs->ty;
+    //node->ty = rhs->ty;
     node->lhs = lhs;
     node->rhs = rhs;
     node->file_num = file_num;
@@ -1356,18 +1432,17 @@ Node* create_addr_node(Node* value, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_ADDR;
     node->next = NULL;
-    node->ty = create_ptr_type(value->ty);
+    //node->ty = create_ptr_type(value->ty);
     node->lhs = value;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
 }
 Node* create_deref_node(Node* value, int file_num, int line_num) {
-    if (value->ty->kind != TY_PTR) error("attempting to dereference non-pointer type");
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_DEREF;
     node->next = NULL;
-    node->ty = value->ty->base;
+    //node->ty = value->ty->base;
     node->lhs = value;
     node->file_num = file_num;
     node->line_num = line_num;
@@ -1383,11 +1458,11 @@ Node* create_not_node(Node* value, int file_num, int line_num) {
     node->line_num = line_num;
     return node;
 }
-Node* create_bit_not_node(Type* type, Node* value, int file_num, int line_num) {
+Node* create_bit_not_node(Node* value, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BITNOT;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->lhs = value;
     node->file_num = file_num;
     node->line_num = line_num;
@@ -1419,7 +1494,7 @@ Node* create_return_node(Node* value, int file_num, int line_num) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
     node->next = NULL;
-    node->ty = value->ty;
+    //node->ty = value->ty;
     node->lhs = value;
     node->file_num = file_num;
     node->line_num = line_num;
@@ -1435,35 +1510,31 @@ Node* create_if_node(Node* cond_node, Node* then_node, int file_num, int line_nu
     node->line_num = line_num;
     return node;
 }
+Node* create_expression_stmt_node(Node* expression_node, int file_num, int line_num) {
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_EXPR_STMT;
+    node->next = NULL;
+    node->ty = create_base_type(BTY_VOID);
+    node->lhs = expression_node;
+    node->file_num = file_num;
+    node->line_num = line_num;
+    return node;
+}
 Node* create_if_else_node(Node* cond_node, Node* then_node, Node* else_node, int file_num, int line_num) {
     Node* node = create_if_node(cond_node, then_node, file_num, line_num);
     node->els = else_node;
     return node;
 }
-int brk_count = 0;
-int cont_count = 0;
 Node* create_while_node(Node* cond_node, Node* body_node, int file_num, int line_num, char** brk_label, char** cont_label) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_FOR;
     node->next = NULL;
     node->cond = cond_node;
-    node->body = body_node;
-    node->init = create_null_expression_node(file_num, line_num);
-    node->inc = create_null_expression_node(file_num, line_num);
-    {
-        int len = snprintf(NULL, 0, ".L.break%d", brk_count);
-        *brk_label = calloc(1, len+1);
-        snprintf(*brk_label, len+1, ".L.break%d", brk_count);
-        brk_count += 1;
-        node->brk_label = *brk_label;
-    }
-    {
-        int len = snprintf(NULL, 0, ".L.cont%d", cont_count);
-        *cont_label = calloc(1, len+1);
-        snprintf(*cont_label, len+1, ".L.cont%d", cont_count);
-        cont_count += 1;
-        node->cont_label = *cont_label;
-    }
+    node->then = body_node;
+    node->init = NULL;
+    node->inc = NULL;
+    node->brk_label = *brk_label;
+    node->cont_label = *cont_label;
     return node;
 }
 Node* create_for_node(Node* init_node, Node* cond_node, Node* inc_node, Node* body_node, int file_num, int line_num, char** brk_label, char** cont_label) {
@@ -1478,20 +1549,8 @@ Node* create_do_node(Node* body_node, Node* cond_node, int file_num, int line_nu
     node->next = NULL;
     node->cond = cond_node;
     node->body = body_node;
-    {
-        int len = snprintf(NULL, 0, ".L.break%d", brk_count);
-        *brk_label = calloc(1, len+1);
-        snprintf(*brk_label, len+1, ".L.break%d", brk_count);
-        brk_count += 1;
-        node->brk_label = *brk_label;
-    }
-    {
-        int len = snprintf(NULL, 0, ".L.cont%d", cont_count);
-        *cont_label = calloc(1, len+1);
-        snprintf(*cont_label, len+1, ".L.cont%d", cont_count);
-        cont_count += 1;
-        node->cont_label = *cont_label;
-    }
+    node->brk_label = *brk_label;
+    node->cont_label = *cont_label;
     return node;
 }
 Node* create_block_node(Node** body_node_list, int file_num, int line_num) {
@@ -1582,13 +1641,7 @@ Node* create_switch_node(Node** cases_node_list, Node* cond_node, int file_num, 
             current = current->case_next;
         }
     }
-    {
-        int len = snprintf(NULL, 0, ".L.break%d", brk_count);
-        *brk_label = calloc(1, len+1);
-        snprintf(*brk_label, len+1, ".L.break%d", brk_count);
-        brk_count += 1;
-        node->brk_label = *brk_label;
-    }
+    node->brk_label = *brk_label;
     node->file_num = file_num;
     node->line_num = line_num;
     return node;
@@ -1693,32 +1746,13 @@ Node* create_funcall_node(Node* function_node, Type* function_type, Node** arg_n
     node->line_num = line_num;
     return node;
 }
-Node* create_expression_stmt_node(Node* expression_node, int file_num, int line_num) {
-    Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_EXPR_STMT;
-    node->next = NULL;
-    node->ty = create_base_type(BTY_VOID);
-    node->lhs = expression_node;
-    node->file_num = file_num;
-    node->line_num = line_num;
-    return node;
-}
-Type* get_block_type(Node* block_node) {
-    if (block_node->kind != ND_BLOCK) error("attempting to create a block expression with non-block");
-    Node* current = block_node->body;
-    if (current == NULL) error("attempting to create block expression with empty body");
-    while(current->next != NULL) current = current->next;
-    if (current->kind == ND_BLOCK) return get_block_type(current);
-    else if (current->kind != ND_EXPR_STMT) error("attempting to create block expression that does not end with an expression statement");
-    else return current->lhs->ty;
-}
 Node* create_block_expression_node(Node** body_node_list, int file_num, int line_num) {
     Node* block_node = create_block_node(body_node_list, file_num, line_num);
-    Type* type = get_block_type(block_node);
+    //Type* type = get_block_type(block_node);
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_STMT_EXPR;
     node->next = NULL;
-    node->ty = type;
+    //node->ty = type;
     node->body = block_node;
     node->file_num = file_num;
     node->line_num = line_num;
@@ -1840,7 +1874,7 @@ Node* create_atomic_exchange_node(Node* ptr, Node* new, int file_num, int line_n
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_EXCH;
     node->next = NULL;
-    node->ty = new->ty;
+    //node->ty = new->ty;
     node->cas_addr = ptr;
     node->cas_new = new;
     node->file_num = file_num;

@@ -34,17 +34,17 @@ void aProg(ObjectList prog, char* output_file);
 UniqueLabel create_unique_label();
 
 Node create_null_expression_node(int file_num, int line_num);
-Node create_add_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_sub_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_mul_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_div_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_neg_node(Type type, Node value, int file_num, int line_num);
-Node create_mod_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_bit_and_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_bit_or_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_bit_xor_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_shl_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
-Node create_shr_node(Type type, Node lhs, Node rhs, int file_num, int line_num);
+Node create_add_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_sub_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_mul_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_div_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_neg_node(Node value, int file_num, int line_num);
+Node create_mod_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_bit_and_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_bit_or_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_bit_xor_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_shl_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_shr_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_eq_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_ne_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_lt_node(Node lhs, Node rhs, int file_num, int line_num);
@@ -52,8 +52,8 @@ Node create_le_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_gt_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_ge_node(Node lhs, Node rhs, int file_num, int line_num);
 Node create_ass_node(Node lhs, Node rhs, int file_num, int line_num);
-Node create_cond_node(Type type, Node cond_node, Node then_node, Node else_node, int file_num, int line_num);
-Node create_comma_node(Node lhs, Node rhs, int file_num, int line_num);
+Node create_cond_node(Node cond_node, Node then_node, Node else_node, int file_num, int line_num);
+Node create_comma_node(Node rhs, int file_num, int line_num);
 Node create_member_node(Node struct_node, Type struct_union_type, int member_idx, int file_num, int line_num);
 Node create_addr_node(Node value, int file_num, int line_num);
 Node create_deref_node(Node value, int file_num, int line_num);
@@ -104,10 +104,13 @@ void append_unpacked_struct_type_member(MemberList list, Type type);
 
 typedef enum {
     BTY_VOID, BTY_BOOL,
-    BTY_CHAR, BTY_SHORT,
-    BTY_INT, BTY_LONG,
+    BTY_CHAR, BTY_UCHAR,
+    BTY_SHORT, BTY_USHORT,
+    BTY_INT, BTY_UINT,
+    BTY_LONG, BTY_ULONG,
     BTY_FLOAT, BTY_DOUBLE,
-    BTY_LDOUBLE } BaseType;
+    BTY_LDOUBLE,
+} BaseType;
 Type create_union_type(MemberList members);
 Type create_union_type_full(MemberList members, bool is_packed);
 Type create_struct_type(MemberList members);
@@ -121,7 +124,6 @@ Type create_enum_type();
 Type create_base_type(BaseType type);
 
 Type get_return_type(Type func_type);
-Type get_expression_type(Node expression);
 long get_type_size(Type type);
 
 void append_type(TypeList list, Type type);
